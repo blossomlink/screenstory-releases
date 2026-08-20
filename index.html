@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ScreenStory — beautiful screen recordings for macOS</title>
+<meta name="description" content="A native macOS screen recorder. Record raw, style later: gradient framing, auto zoom on clicks, webcam bubble. Zero editing effort.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ground: #0c0c10;
+  --surface: #26252e;
+  --text: #f4f3f7;
+  --text-soft: #a9a5b4;
+  --text-faint: #736f7e;
+  --line: #3a3844;
+  --accent: #5994f5;
+  --accent-deep: #336bd4;
+  --record: #ff3b30;
+  --serif: "Instrument Serif", Georgia, serif;
+  --sans: "Sora", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--sans);
+  font-weight: 300;
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+/* ambient gradient field, echoes the app's export framing */
+.sky {
+  position: fixed; inset: 0; z-index: -1;
+  background:
+    radial-gradient(52vw 42vh at 78% -6%, rgba(89,148,245,.20), transparent 65%),
+    radial-gradient(44vw 38vh at 8% 108%, rgba(51,107,212,.14), transparent 60%),
+    var(--ground);
+}
+.sky::after {
+  content: ""; position: absolute; inset: 0; opacity: .5; mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");
+}
+
+.wrap { max-width: 1060px; margin: 0 auto; padding: 0 28px; }
+
+/* ---------- header ---------- */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 26px 0;
+}
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
+.brand img { width: 34px; height: 34px; border-radius: 8px; }
+.brand span { font-weight: 500; font-size: 17px; letter-spacing: .01em; }
+header nav a {
+  color: var(--text-soft); text-decoration: none; font-size: 14px; margin-left: 26px;
+}
+header nav a:hover { color: var(--text); }
+
+/* ---------- hero ---------- */
+.hero { padding: 72px 0 40px; text-align: center; }
+.hero h1 {
+  font-family: var(--serif); font-weight: 400;
+  font-size: clamp(44px, 7.2vw, 82px);
+  line-height: 1.04; letter-spacing: -0.015em;
+}
+.hero h1 em {
+  font-style: italic;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero p.lede {
+  margin: 22px auto 0; max-width: 520px;
+  color: var(--text-soft); font-size: 17px;
+}
+.cta { margin-top: 36px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.dl {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+  color: #fff; text-decoration: none;
+  font-weight: 500; font-size: 16px;
+  padding: 15px 30px; border-radius: 14px;
+  box-shadow: 0 12px 36px rgba(51,107,212,.38), inset 0 1px 0 rgba(255,255,255,.22);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.dl:hover { transform: translateY(-2px); box-shadow: 0 18px 44px rgba(51,107,212,.5), inset 0 1px 0 rgba(255,255,255,.22); }
+.dl svg { width: 17px; height: 17px; }
+.cta .meta { color: var(--text-faint); font-size: 13px; }
+.cta .meta a { color: var(--text-faint); }
+
+/* staggered reveal */
+.hero h1, .hero .lede, .cta, .stage { opacity: 0; transform: translateY(14px); animation: rise .7s ease forwards; }
+.hero .lede { animation-delay: .12s; }
+.cta { animation-delay: .22s; }
+.stage { animation-delay: .34s; }
+@keyframes rise { to { opacity: 1; transform: none; } }
+
+/* ---------- demo stage: the product IS the frame ---------- */
+.stage { padding: 44px 0 30px; }
+.frame {
+  position: relative;
+  border-radius: 22px; padding: clamp(22px, 4.5vw, 52px);
+  background: linear-gradient(135deg, #5994f5, #336bd4 58%, #22509f);
+  box-shadow: 0 30px 80px rgba(0,0,0,.5);
+  overflow: hidden;
+}
+.frame .rec {
+  position: absolute; top: 16px; left: 20px;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 11.5px; font-weight: 500; letter-spacing: .08em; color: rgba(255,255,255,.85);
+}
+.frame .rec i {
+  width: 8px; height: 8px; border-radius: 50%; background: var(--record);
+  animation: blink 1.6s ease-in-out infinite;
+}
+@keyframes blink { 50% { opacity: .25; } }
+.screen {
+  border-radius: 14px; overflow: hidden;
+  background: #15151b;
+  box-shadow: 0 18px 50px rgba(10,20,45,.55);
+  animation: autozoom 9s ease-in-out infinite;
+  transform-origin: 68% 62%;
+}
+/* the app's signature move: smooth zoom into where you click */
+@keyframes autozoom {
+  0%, 18%   { transform: scale(1); }
+  30%, 55%  { transform: scale(1.22); }
+  70%, 100% { transform: scale(1); }
+}
+.titlebar {
+  display: flex; align-items: center; gap: 7px;
+  padding: 11px 14px; background: #1d1d24; border-bottom: 1px solid #2a2a33;
+}
+.titlebar b { width: 11px; height: 11px; border-radius: 50%; }
+.titlebar b:nth-child(1) { background: #ff5f57; }
+.titlebar b:nth-child(2) { background: #febc2e; }
+.titlebar b:nth-child(3) { background: #28c840; }
+.screen .body { padding: 26px 28px 34px; }
+.linebar { height: 10px; border-radius: 5px; background: #2b2b35; margin-bottom: 13px; }
+.linebar.w60 { width: 60%; } .linebar.w85 { width: 85%; } .linebar.w40 { width: 40%; }
+.linebar.hot { width: 72%; background: linear-gradient(90deg, #3a73d6, #5994f5); }
+.cursorDot {
+  position: relative; margin: 20px 0 0 66%;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: #fff; box-shadow: 0 0 0 2px rgba(0,0,0,.25);
+}
+.cursorDot::after {
+  content: ""; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid rgba(89,148,245,.9);
+  animation: ripple 9s ease-out infinite;
+  opacity: 0;
+}
+@keyframes ripple {
+  20% { transform: scale(.4); opacity: 0; }
+  26% { transform: scale(1); opacity: 1; }
+  38% { transform: scale(2.1); opacity: 0; }
+  100% { opacity: 0; }
+}
+.bubble {
+  position: absolute; right: clamp(30px, 6vw, 68px); bottom: clamp(30px, 6vw, 64px);
+  width: clamp(64px, 10vw, 96px); height: clamp(64px, 10vw, 96px);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 35% 30%, #f0c8a8 0 28%, transparent 30%),
+    linear-gradient(160deg, #4a4456, #2b2733);
+  box-shadow: 0 14px 34px rgba(10,20,45,.5), 0 0 0 3px rgba(255,255,255,.85);
+}
+
+/* ---------- features ---------- */
+.features { padding: 64px 0 30px; }
+.features h2, .install h2 {
+  font-family: var(--serif); font-weight: 400; font-size: clamp(30px, 4vw, 42px);
+  letter-spacing: -0.01em; margin-bottom: 34px;
+}
+.grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 14px;
+}
+.card {
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border: 1px solid var(--line);
+  border-radius: 16px; padding: 22px 22px 24px;
+}
+.card h3 { font-size: 15.5px; font-weight: 500; margin-bottom: 8px; }
+.card h3::before {
+  content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 3px;
+  margin-right: 10px; vertical-align: 1px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+}
+.card p { color: var(--text-soft); font-size: 14px; }
+
+/* ---------- install ---------- */
+.install { padding: 54px 0 20px; }
+.install ol { list-style: none; counter-reset: step; max-width: 640px; }
+.install li {
+  counter-increment: step; position: relative;
+  padding: 0 0 22px 54px; color: var(--text-soft); font-size: 15px;
+}
+.install li strong { color: var(--text); font-weight: 500; }
+.install li::before {
+  content: counter(step);
+  position: absolute; left: 0; top: -2px;
+  width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--serif); font-size: 18px; color: var(--accent);
+  border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, transparent);
+}
+
+footer {
+  padding: 48px 0 40px; color: var(--text-faint); font-size: 13px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
+  margin-top: 48px;
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+}
+footer a { color: var(--text-soft); text-decoration: none; }
+footer a:hover { color: var(--text); }
+
+@media (prefers-reduced-motion: reduce) {
+  .screen, .cursorDot::after, .frame .rec i { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="wrap">
+
+<header>
+  <a class="brand" href="#"><img src="icon.svg" alt=""><span>ScreenStory</span></a>
+  <nav>
+    <a href="#features">Features</a>
+    <a href="#install">Install</a>
+    <a href="https://github.com/blossomlink/screenstory-releases/releases">Releases</a>
+  </nav>
+</header>
+
+<section class="hero">
+  <h1>Screen recordings that<br>look <em>hand-crafted.</em></h1>
+  <p class="lede">A native macOS recorder that records raw and styles later — gradient framing, automatic zooms on your clicks, a webcam bubble. Zero editing effort.</p>
+  <div class="cta">
+    <a class="dl" id="download" href="https://github.com/blossomlink/screenstory-releases/releases/latest">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download for macOS
+    </a>
+    <span class="meta" id="dlmeta">Free · macOS 14+ · Apple silicon &amp; Intel · notarized by Apple</span>
+  </div>
+</section>
+
+<section class="stage" aria-hidden="true">
+  <div class="frame">
+    <div class="rec"><i></i>REC</div>
+    <div class="screen">
+      <div class="titlebar"><b></b><b></b><b></b></div>
+      <div class="body">
+        <div class="linebar w60"></div>
+        <div class="linebar w85"></div>
+        <div class="linebar hot"></div>
+        <div class="linebar w40"></div>
+        <div class="cursorDot"></div>
+      </div>
+    </div>
+    <div class="bubble"></div>
+  </div>
+</section>
+
+<section class="features" id="features">
+  <h2>Record raw. Style later.</h2>
+  <div class="grid">
+    <div class="card"><h3>Auto zoom on clicks</h3><p>Your clicks are logged while recording and become smooth zoom-in, hold, zoom-out animations. The focus glides between nearby clicks.</p></div>
+    <div class="card"><h3>Aesthetic framing</h3><p>Gradient background, adjustable padding, rounded corners, and a soft shadow — applied at export, tweakable any time.</p></div>
+    <div class="card"><h3>Webcam bubble</h3><p>A circular camera overlay in the corner of your choice, with mic audio synced to the screen via a shared clock.</p></div>
+    <div class="card"><h3>Crash-safe capture</h3><p>The screen streams straight to disk untouched. 30+ minute recordings keep flat memory use, and a crash loses nothing.</p></div>
+    <div class="card"><h3>WYSIWYG editor</h3><p>Scrub any frame, edit zoom keyframes on the timeline, then export 1080p, 4K, or original size as .mp4.</p></div>
+    <div class="card"><h3>Re-edit any recording</h3><p>Projects keep their raw materials, so you can reopen, restyle, and re-export past recordings whenever.</p></div>
+  </div>
+</section>
+
+<section class="install" id="install">
+  <h2>Up and running in a minute.</h2>
+  <ol>
+    <li><strong>Download and unzip,</strong> then drag ScreenStory.app to your Applications folder and open it.</li>
+    <li><strong>Grant Screen Recording</strong> when macOS asks (System Settings → Privacy &amp; Security), then relaunch once — macOS requires it.</li>
+    <li><strong>Hit Start Recording.</strong> The app hides itself; stop from the menu bar or ⌘⇧S, style in the editor, export.</li>
+  </ol>
+</section>
+
+<footer>
+  <span>© 2026 Blossomlink, LLC</span>
+  <span>English · 日本語 — the app follows your system language</span>
+  <a href="https://github.com/blossomlink/screenstory-releases/releases">Release notes</a>
+</footer>
+
+</div>
+
+<script>
+// Upgrade the download button to the latest zip's direct link + show the version.
+fetch("https://api.github.com/repos/blossomlink/screenstory-releases/releases/latest")
+  .then(r => r.ok ? r.json() : null)
+  .then(rel => {
+    if (!rel) return;
+    const zip = (rel.assets || []).find(a => a.name.endsWith(".zip"));
+    if (zip) document.getElementById("download").href = zip.browser_download_url;
+    const v = (rel.tag_name || "").replace(/^v/, "");
+    if (v) document.getElementById("dlmeta").innerHTML =
+      `Version ${v} · Free · macOS 14+ · notarized by Apple`;
+  })
+  .catch(() => {});
+</script>
+</body>
+</html>
