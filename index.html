@@ -176,7 +176,7 @@ header nav a:hover { color: var(--text); }
 
 /* ---------- features ---------- */
 .features { padding: 64px 0 30px; }
-.features h2, .install h2 {
+.features h2 {
   font-family: var(--display); font-weight: 800; font-size: clamp(26px, 3.4vw, 36px);
   letter-spacing: -0.01em; margin-bottom: 34px;
 }
@@ -196,23 +196,6 @@ header nav a:hover { color: var(--text); }
   background: linear-gradient(135deg, var(--accent), var(--accent-deep));
 }
 .card p { color: var(--text-soft); font-size: 14px; }
-
-/* ---------- install ---------- */
-.install { padding: 54px 0 20px; }
-.install ol { list-style: none; counter-reset: step; max-width: 640px; }
-.install li {
-  counter-increment: step; position: relative;
-  padding: 0 0 22px 54px; color: var(--text-soft); font-size: 15px;
-}
-.install li strong { color: var(--text); font-weight: 500; }
-.install li::before {
-  content: counter(step);
-  position: absolute; left: 0; top: -2px;
-  width: 34px; height: 34px; border-radius: 50%;
-  display: grid; place-items: center;
-  font-family: var(--display); font-weight: 800; font-size: 15px; color: var(--accent);
-  border: 1px solid var(--line); background: color-mix(in srgb, var(--surface) 60%, transparent);
-}
 
 footer {
   padding: 48px 0 40px; color: var(--text-faint); font-size: 13px;
@@ -236,7 +219,6 @@ footer a:hover { color: var(--text); }
   <a class="brand" href="#"><img src="icon.svg" alt=""><span>ScreenStory</span></a>
   <nav>
     <a href="#features">Features</a>
-    <a href="#install">Install</a>
     <a href="https://github.com/blossomlink/screenstory-releases/releases">Releases</a>
   </nav>
 </header>
@@ -249,7 +231,7 @@ footer a:hover { color: var(--text); }
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Download for macOS
     </a>
-    <span class="meta" id="dlmeta">Free · macOS 14+ · Apple silicon &amp; Intel · notarized by Apple</span>
+    <span class="meta" id="dlmeta">Free · macOS 14+ · Apple silicon &amp; Intel</span>
   </div>
 </section>
 
@@ -282,19 +264,9 @@ footer a:hover { color: var(--text); }
   </div>
 </section>
 
-<section class="install" id="install">
-  <h2>Up and running in a minute.</h2>
-  <ol>
-    <li><strong>Download and unzip,</strong> then drag ScreenStory.app to your Applications folder and open it.</li>
-    <li><strong>Grant Screen Recording</strong> when macOS asks (System Settings → Privacy &amp; Security), then relaunch once — macOS requires it.</li>
-    <li><strong>Hit Start Recording.</strong> The app hides itself; stop from the menu bar or ⌘⇧S, style in the editor, export.</li>
-  </ol>
-</section>
 
 <footer>
   <span>© 2026 Blossomlink, LLC</span>
-  <span>English · 日本語 — the app follows your system language</span>
-  <a href="https://github.com/blossomlink/screenstory-releases/releases">Release notes</a>
 </footer>
 
 </div>
@@ -309,7 +281,7 @@ fetch("https://api.github.com/repos/blossomlink/screenstory-releases/releases/la
     if (zip) document.getElementById("download").href = zip.browser_download_url;
     const v = (rel.tag_name || "").replace(/^v/, "");
     if (v) document.getElementById("dlmeta").innerHTML =
-      `Version ${v} · Free · macOS 14+ · notarized by Apple`;
+      `Version ${v} · Free · macOS 14+`;
   })
   .catch(() => {});
 </script>
